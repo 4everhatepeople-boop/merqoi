@@ -58,10 +58,11 @@
             letter-spacing: -0.01em;
         }
 
+        /* --- Звёзды (без отзывов) --- */
         .rating {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             margin-top: 4px;
             font-size: 14px;
             font-weight: 300;
@@ -88,12 +89,6 @@
             color: #cccccc;
         }
 
-        .reviews-count {
-            color: #777777;
-            font-size: 13px;
-            margin-left: 2px;
-        }
-
         .section-title {
             font-size: 20px;
             font-weight: 400;
@@ -114,18 +109,20 @@
             gap: 16px;
         }
 
+        /* --- Карточка товара - БЕЛЫЙ ФОН --- */
         .item-card {
             display: flex;
             flex-direction: column;
             border-radius: 12px;
             overflow: hidden;
-            background-color: #fafafa;
+            background-color: #ffffff;  /* ← теперь чисто белый */
+            border: 1px solid #f0f0f0;  /* ← тонкая серая рамка вместо серого фона */
         }
 
         .item-image {
             width: 100%;
             aspect-ratio: 1 / 1;
-            background-color: #f0f0f0;
+            background-color: #f5f5f5;
             object-fit: cover;
             display: block;
         }
@@ -203,7 +200,6 @@
             <div class="username" id="usernameDisplay">MERQOI</div>
             <div class="rating">
                 <span class="stars" id="starsContainer"></span>
-                <span class="reviews-count" id="reviewsCount">(0 отзывов)</span>
             </div>
         </div>
     </div>
@@ -221,43 +217,21 @@
         // 1. НАСТРОЙКИ MERQOI (МЕНЯЙ ЗДЕСЬ)
         // ============================================================
 
-        // --- Рейтинг (звёзды и отзывы) ---
+        // --- Рейтинг (только звёзды, отзывы убраны) ---
         const RATING = {
-            stars: 5,        // 1-5
-            reviews: 15      // число отзывов
+            stars: 5        // 1-5
         };
 
         // --- ТВОИ ТОВАРЫ (добавляй сюда) ---
-        // Фото клади в папку images/ и пиши путь: "images/имя_файла.jpg"
         const PRODUCTS = [
             {
-                name: "Футболка Nike",
-                price: "1 500 ₽",
-                description: "Размер M, хлопок 100%",
-                seller: "@vlad_seller",
-                photo: "images/nike-tee.jpg"   // <-- ТВОЁ ФОТО в папке images
+                name: "ВАШ ПОСТ",
+                price: "0 ₽",
+                description: "",
+                seller: "@ayvazovsq",
+                photo: "images/nike-tee.jpg"
             },
-            {
-                name: "Кроссовки Adidas",
-                price: "4 200 ₽",
-                description: "Новые, размер 42",
-                seller: "@anna_shop",
-                photo: "images/adidas-run.jpg"
-            },
-            {
-                name: "Джинсы Levi's",
-                price: "2 800 ₽",
-                description: "30/32, почти новые",
-                seller: "@mike_fashion",
-                photo: "images/levis-jeans.jpg"
-            },
-            {
-                name: "Куртка TNF",
-                price: "6 500 ₽",
-                description: "Размер L, утеплённая",
-                seller: "@katrin_outdoor",
-                photo: "images/tnf-jacket.jpg"
-            }
+            
         ];
 
         // ============================================================
@@ -315,7 +289,6 @@
             }
 
             document.getElementById('starsContainer').innerHTML = renderStars(RATING.stars);
-            document.getElementById('reviewsCount').textContent = `(${RATING.reviews} отзывов)`;
         }
 
         function renderProducts() {
