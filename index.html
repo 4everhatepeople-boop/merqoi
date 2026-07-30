@@ -57,9 +57,17 @@
             letter-spacing: -0.01em;
         }
 
-        /* --- Поиск --- */
+        /* --- Поиск с кнопкой --- */
         .search-container {
+            display: flex;
+            gap: 10px;
             margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
         }
 
         .search-input {
@@ -89,11 +97,30 @@
             color: #cccccc;
         }
 
+        .search-btn {
+            padding: 10px 18px;
+            font-size: 15px;
+            font-weight: 400;
+            font-family: inherit;
+            background-color: #000000;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .search-btn:active {
+            opacity: 0.7;
+        }
+
         .results-count {
             font-size: 13px;
             font-weight: 300;
             color: #888888;
-            margin-top: 6px;
+            margin-top: -10px;
             margin-bottom: 12px;
             display: none;
         }
@@ -215,6 +242,10 @@
                 font-size: 14px;
                 padding: 9px 12px;
             }
+            .search-btn {
+                font-size: 14px;
+                padding: 9px 14px;
+            }
         }
     </style>
 </head>
@@ -229,11 +260,15 @@
         </div>
     </div>
 
-    <!-- ===== ПОИСК ===== -->
+    <!-- ===== ПОИСК С КНОПКОЙ ===== -->
     <div class="search-container">
-        <input class="search-input" id="searchInput" type="text" placeholder="Поиск по бренду или модели..." autocomplete="off" />
-        <div class="results-count" id="resultsCount"></div>
+        <div class="search-input-wrapper">
+            <input class="search-input" id="searchInput" type="search" placeholder="Поиск по бренду или модели..." autocomplete="off" />
+        </div>
+        <button class="search-btn" id="searchBtn">Найти</button>
     </div>
+
+    <div class="results-count" id="resultsCount"></div>
 
     <div class="section-title">
         Last items <span></span>
@@ -257,7 +292,6 @@
                 seller: "@ayvazovsq",
                 photo: "images/yourpost.jpg"
             },
-
             {
                 name: "Balenciaga Round",
                 price: "22.000 ₽",
@@ -380,13 +414,28 @@
             renderProducts(filtered);
         }
 
+        // --- Закрытие клавиатуры ---
+        function closeKeyboard() {
+            const input = document.getElementById('searchInput');
+            input.blur();
+        }
+
+        // --- Поиск с закрытием клавиатуры ---
+        function performSearch() {
+            const input = document.getElementById('searchInput');
+            filterProducts(input.value);
+            closeKeyboard();
+        }
+
         function init() {
             renderProfile();
             renderProducts(PRODUCTS);
 
             const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
             let searchTimeout;
 
+            // --- Поиск при вводе (с задержкой) ---
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
@@ -394,11 +443,26 @@
                 }, 300);
             });
 
+            // --- Кнопка "Найти" ---
+            searchBtn.addEventListener('click', performSearch);
+
+            // --- Enter на клавиатуре ---
             searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
                 if (e.key === 'Escape') {
                     this.value = '';
                     filterProducts('');
-                    this.blur();
+                    closeKeyboard();
+                }
+            });
+
+            // --- Клик вне поля закрывает клавиатуру ---
+            document.addEventListener('click', function(e) {
+                if (e.target !== searchInput && e.target !== searchBtn) {
+                    closeKeyboard();
                 }
             });
 
