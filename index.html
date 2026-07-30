@@ -26,7 +26,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 28px;
+            margin-bottom: 20px;
             padding-bottom: 16px;
             border-bottom: 1px solid #f0f0f0;
         }
@@ -55,6 +55,51 @@
             font-size: 17px;
             font-weight: 400;
             letter-spacing: -0.01em;
+        }
+
+        /* --- Поиск --- */
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 15px;
+            font-weight: 300;
+            font-family: inherit;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background-color: #f8f8f8;
+            color: #000000;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input::placeholder {
+            color: #aaaaaa;
+        }
+
+        .search-input:focus {
+            border-color: #000000;
+            background-color: #ffffff;
+        }
+
+        .search-input:focus::placeholder {
+            color: #cccccc;
+        }
+
+        .results-count {
+            font-size: 13px;
+            font-weight: 300;
+            color: #888888;
+            margin-top: 6px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .results-count.visible {
+            display: block;
         }
 
         .section-title {
@@ -140,6 +185,19 @@
             overflow: hidden;
         }
 
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #999999;
+            padding: 40px 0;
+            font-weight: 300;
+            display: none;
+        }
+
+        .no-results.visible {
+            display: block;
+        }
+
         @media (max-width: 380px) {
             .items-grid {
                 gap: 12px;
@@ -152,6 +210,10 @@
             }
             .item-price {
                 font-size: 13px;
+            }
+            .search-input {
+                font-size: 14px;
+                padding: 9px 12px;
             }
         }
     </style>
@@ -167,11 +229,19 @@
         </div>
     </div>
 
+    <!-- ===== ПОИСК ===== -->
+    <div class="search-container">
+        <input class="search-input" id="searchInput" type="text" placeholder="Поиск по бренду или модели..." autocomplete="off" />
+        <div class="results-count" id="resultsCount"></div>
+    </div>
+
     <div class="section-title">
         Last items <span></span>
     </div>
 
     <div class="items-grid" id="itemsGrid"></div>
+
+    <div class="no-results" id="noResults">Ничего не найдено</div>
 
     <script>
         // ============================================================
@@ -186,14 +256,6 @@
                 description: "",
                 seller: "@ayvazovsq",
                 photo: "images/yourpost.jpg"
-            },
-
-            {
-                name: "Balenciaga Round",
-                price: "22.000 ₽",
-                description: "size xs, cond 9/10",
-                seller: "@gasyon",
-                photo: "images/blncrnd.jpg"
             },
             // Добавляй новые товары через запятую:
             // {
@@ -251,15 +313,29 @@
             }
         }
 
-        function renderProducts() {
+        function renderProducts(products) {
             const grid = document.getElementById('itemsGrid');
-            if (!PRODUCTS || PRODUCTS.length === 0) {
-                grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#999;padding:40px 0;">Товаров пока нет</p>`;
+            const noResults = document.getElementById('noResults');
+            const resultsCount = document.getElementById('resultsCount');
+
+            if (!products || products.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.add('visible');
+                resultsCount.classList.remove('visible');
                 return;
             }
 
+            noResults.classList.remove('visible');
+
+            if (products.length < PRODUCTS.length) {
+                resultsCount.textContent = `Найдено: ${products.length} товаров`;
+                resultsCount.classList.add('visible');
+            } else {
+                resultsCount.classList.remove('visible');
+            }
+
             let html = '';
-            for (const item of PRODUCTS) {
+            for (const item of products) {
                 const photo = item.photo || 'https://via.placeholder.com/400x400/f0f0f0/cccccc?text=+';
                 html += `
                     <div class="item-card">
@@ -276,9 +352,48 @@
             grid.innerHTML = html;
         }
 
+        function filterProducts(query) {
+            const searchTerm = query.toLowerCase().trim();
+
+            if (!searchTerm) {
+                renderProducts(PRODUCTS);
+                return;
+            }
+
+            const filtered = PRODUCTS.filter(item => {
+                const name = (item.name || '').toLowerCase();
+                const description = (item.description || '').toLowerCase();
+                const seller = (item.seller || '').toLowerCase();
+                return name.includes(searchTerm) || 
+                       description.includes(searchTerm) || 
+                       seller.includes(searchTerm);
+            });
+
+            renderProducts(filtered);
+        }
+
         function init() {
             renderProfile();
-            renderProducts();
+            renderProducts(PRODUCTS);
+
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    filterProducts(this.value);
+                }, 300);
+            });
+
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    this.value = '';
+                    filterProducts('');
+                    this.blur();
+                }
+            });
+
             try {
                 if (window.Telegram?.WebApp) {
                     window.Telegram.WebApp.ready();
