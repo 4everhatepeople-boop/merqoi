@@ -58,7 +58,7 @@
             letter-spacing: -0.01em;
         }
 
-        /* --- Поиск с кнопкой-лупой --- */
+        /* --- Поиск с кнопкой-лупой (SVG) --- */
         .search-container {
             display: flex;
             gap: 10px;
@@ -102,10 +102,7 @@
             width: 44px;
             height: 44px;
             padding: 0;
-            font-size: 20px;
-            line-height: 1;
             background-color: #000000;
-            color: #ffffff;
             border: none;
             border-radius: 10px;
             cursor: pointer;
@@ -118,6 +115,16 @@
 
         .search-btn:active {
             opacity: 0.7;
+        }
+
+        .search-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: #ffffff;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .results-count {
@@ -249,7 +256,10 @@
             .search-btn {
                 width: 40px;
                 height: 40px;
-                font-size: 18px;
+            }
+            .search-btn svg {
+                width: 20px;
+                height: 20px;
             }
         }
     </style>
@@ -265,12 +275,17 @@
         </div>
     </div>
 
-    <!-- ===== ПОИСК С ЛУПОЙ ===== -->
+    <!-- ===== ПОИСК С ЛУПОЙ (SVG) ===== -->
     <div class="search-container">
         <div class="search-input-wrapper">
             <input class="search-input" id="searchInput" type="search" placeholder="Поиск по бренду или модели..." autocomplete="off" />
         </div>
-        <button class="search-btn" id="searchBtn">🔍</button>
+        <button class="search-btn" id="searchBtn" aria-label="Поиск">
+            <svg viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="7" />
+                <line x1="16.5" y1="16.5" x2="21" y2="21" />
+            </svg>
+        </button>
     </div>
 
     <div class="results-count" id="resultsCount"></div>
