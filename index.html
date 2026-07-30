@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>MERQOI</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            padding: 16px 16px 32px;
+            font-weight: 300;
+            line-height: 1.4;
+            min-height: 100vh;
+        }
+
+        /* --- Шапка --- */
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .username {
+            font-size: 17px;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            font-size: 14px;
+            font-weight: 300;
+            color: #333333;
+        }
+
+        .stars {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .star-icon {
+            font-size: 14px;
+            line-height: 1;
+            color: #000000;
+        }
+
+        .star-icon.filled {
+            color: #000000;
+        }
+
+        .star-icon.empty {
+            color: #cccccc;
+        }
+
+        .reviews-count {
+            color: #777777;
+            font-size: 13px;
+            margin-left: 2px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+
+        .section-title span {
+            font-weight: 300;
+            color: #666666;
+            font-size: 15px;
+            margin-left: 8px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .item-card {
+            display: flex;
+            flex-direction: column;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #fafafa;
+        }
+
+        .item-image {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: #f0f0f0;
+            object-fit: cover;
+            display: block;
+        }
+
+        .item-details {
+            padding: 10px 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .item-name {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            line-height: 1.3;
+        }
+
+        .item-price {
+            font-size: 14px;
+            font-weight: 400;
+            color: #000000;
+            letter-spacing: -0.01em;
+        }
+
+        .item-seller {
+            font-size: 13px;
+            font-weight: 300;
+            color: #666666;
+            margin-top: 2px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .item-seller:hover {
+            color: #000000;
+        }
+
+        .item-description {
+            font-size: 12px;
+            font-weight: 300;
+            color: #888888;
+            margin-top: 2px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        @media (max-width: 380px) {
+            .items-grid {
+                gap: 12px;
+            }
+            .item-details {
+                padding: 8px 8px 10px;
+            }
+            .item-name {
+                font-size: 14px;
+            }
+            .item-price {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== ПРОФИЛЬ ===== -->
+    <div class="profile" id="profile">
+        <div class="avatar" id="avatarContainer">
+            <img id="avatarImg" src="" alt="avatar" />
+        </div>
+        <div class="user-info">
+            <div class="username" id="usernameDisplay">MERQOI</div>
+            <div class="rating">
+                <span class="stars" id="starsContainer"></span>
+                <span class="reviews-count" id="reviewsCount">(0 отзывов)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЗАГОЛОВОК ===== -->
+    <div class="section-title">
+        Одежда <span>свежее</span>
+    </div>
+
+    <!-- ===== ТОВАРЫ ===== -->
+    <div class="items-grid" id="itemsGrid"></div>
+
+    <script>
+        // ============================================================
+        // 1. НАСТРОЙКИ MERQOI (МЕНЯЙ ЗДЕСЬ)
+        // ============================================================
+
+        // --- Рейтинг (звёзды и отзывы) ---
+        const RATING = {
+            stars: 5,        // 1-5
+            reviews: 15      // число отзывов
+        };
+
+        // --- ТВОИ ТОВАРЫ (добавляй сюда) ---
+        // Фото клади в папку images/ и пиши путь: "images/имя_файла.jpg"
+        const PRODUCTS = [
+            {
+                name: "Футболка Nike",
+                price: "1 500 ₽",
+                description: "Размер M, хлопок 100%",
+                seller: "@vlad_seller",
+                photo: "images/nike-tee.jpg"   // <-- ТВОЁ ФОТО в папке images
+            },
+            {
+                name: "Кроссовки Adidas",
+                price: "4 200 ₽",
+                description: "Новые, размер 42",
+                seller: "@anna_shop",
+                photo: "images/adidas-run.jpg"
+            },
+            {
+                name: "Джинсы Levi's",
+                price: "2 800 ₽",
+                description: "30/32, почти новые",
+                seller: "@mike_fashion",
+                photo: "images/levis-jeans.jpg"
+            },
+            {
+                name: "Куртка TNF",
+                price: "6 500 ₽",
+                description: "Размер L, утеплённая",
+                seller: "@katrin_outdoor",
+                photo: "images/tnf-jacket.jpg"
+            }
+        ];
+
+        // ============================================================
+        // 2. КОД ОТРИСОВКИ (НЕ ТРОГАЙ)
+        // ============================================================
+
+        function renderStars(rating, maxStars = 5) {
+            let html = '';
+            const filled = Math.min(Math.max(rating, 0), maxStars);
+            for (let i = 0; i < maxStars; i++) {
+                html += `<span class="star-icon ${i < filled ? 'filled' : 'empty'}">★</span>`;
+            }
+            return html;
+        }
+
+        function getUserData() {
+            try {
+                const tg = window.Telegram?.WebApp;
+                if (tg?.initDataUnsafe?.user) {
+                    const user = tg.initDataUnsafe.user;
+                    return {
+                        username: user.username ? '@' + user.username : null,
+                        firstName: user.first_name || '',
+                        lastName: user.last_name || '',
+                    };
+                }
+            } catch (_) {}
+            return null;
+        }
+
+        function renderProfile() {
+            const tgUser = getUserData();
+            let displayName = 'MERQOI';
+
+            if (tgUser) {
+                if (tgUser.username) {
+                    displayName = tgUser.username;
+                } else if (tgUser.firstName) {
+                    displayName = [tgUser.firstName, tgUser.lastName].filter(Boolean).join(' ');
+                }
+            }
+
+            if (displayName && !displayName.startsWith('@') && !displayName.includes(' ')) {
+                displayName = '@' + displayName;
+            }
+
+            document.getElementById('usernameDisplay').textContent = displayName;
+
+            const avatarImg = document.getElementById('avatarImg');
+            if (tgUser?.firstName) {
+                const name = encodeURIComponent(tgUser.firstName + ' ' + (tgUser.lastName || ''));
+                avatarImg.src = `https://ui-avatars.com/api/?name=${name}&background=e0e0e0&color=333333&size=96&font-size=0.4&bold=true&rounded=true`;
+            } else {
+                avatarImg.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"%3E%3Ccircle cx="24" cy="24" r="24" fill="%23e0e0e0"/%3E%3Ctext x="24" y="29" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="16" fill="%23999"%3EM%3C/text%3E%3C/svg%3E';
+            }
+
+            document.getElementById('starsContainer').innerHTML = renderStars(RATING.stars);
+            document.getElementById('reviewsCount').textContent = `(${RATING.reviews} отзывов)`;
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('itemsGrid');
+            if (!PRODUCTS || PRODUCTS.length === 0) {
+                grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#999;padding:40px 0;">Товаров пока нет</p>`;
+                return;
+            }
+
+            let html = '';
+            for (const item of PRODUCTS) {
+                const photo = item.photo || 'https://via.placeholder.com/400x400/f0f0f0/cccccc?text=+';
+                html += `
+                    <div class="item-card">
+                        <img class="item-image" src="${photo}" alt="${item.name || ''}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x400/f0f0f0/cccccc?text=?'" />
+                        <div class="item-details">
+                            <div class="item-name">${item.name || 'Без названия'}</div>
+                            <div class="item-price">${item.price || 'Цена не указана'}</div>
+                            ${item.description ? `<div class="item-description">${item.description}</div>` : ''}
+                            ${item.seller ? `<a class="item-seller" href="tg://resolve?domain=${item.seller.replace('@', '')}" target="_blank">${item.seller}</a>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            grid.innerHTML = html;
+        }
+
+        function init() {
+            renderProfile();
+            renderProducts();
+            try {
+                if (window.Telegram?.WebApp) {
+                    window.Telegram.WebApp.ready();
+                    window.Telegram.WebApp.expand();
+                }
+            } catch (_) {}
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+
+</body>
+</html>
