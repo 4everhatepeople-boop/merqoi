@@ -22,7 +22,6 @@
             min-height: 100vh;
         }
 
-        /* --- Шапка --- */
         .profile {
             display: flex;
             align-items: center;
@@ -58,37 +57,6 @@
             letter-spacing: -0.01em;
         }
 
-        /* --- Звёзды (без отзывов) --- */
-        .rating {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: 4px;
-            font-size: 14px;
-            font-weight: 300;
-            color: #333333;
-        }
-
-        .stars {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-        }
-
-        .star-icon {
-            font-size: 14px;
-            line-height: 1;
-            color: #000000;
-        }
-
-        .star-icon.filled {
-            color: #000000;
-        }
-
-        .star-icon.empty {
-            color: #cccccc;
-        }
-
         .section-title {
             font-size: 20px;
             font-weight: 400;
@@ -109,14 +77,13 @@
             gap: 16px;
         }
 
-        /* --- Карточка товара - БЕЛЫЙ ФОН --- */
         .item-card {
             display: flex;
             flex-direction: column;
             border-radius: 12px;
             overflow: hidden;
-            background-color: #ffffff;  /* ← теперь чисто белый */
-            border: 1px solid #f0f0f0;  /* ← тонкая серая рамка вместо серого фона */
+            background-color: #ffffff;
+            border: 1px solid #f0f0f0;
         }
 
         .item-image {
@@ -191,25 +158,19 @@
 </head>
 <body>
 
-    <!-- ===== ПРОФИЛЬ ===== -->
     <div class="profile" id="profile">
         <div class="avatar" id="avatarContainer">
             <img id="avatarImg" src="" alt="avatar" />
         </div>
         <div class="user-info">
             <div class="username" id="usernameDisplay">MERQOI</div>
-            <div class="rating">
-                <span class="stars" id="starsContainer"></span>
-            </div>
         </div>
     </div>
 
-    <!-- ===== ЗАГОЛОВОК ===== -->
     <div class="section-title">
         Last items <span></span>
     </div>
 
-    <!-- ===== ТОВАРЫ ===== -->
     <div class="items-grid" id="itemsGrid"></div>
 
     <script>
@@ -226,21 +187,19 @@
                 seller: "@ayvazovsq",
                 photo: "images/yourpost.jpg"
             },
-            
+            // Добавляй новые товары через запятую:
+            // {
+            //     name: "Название",
+            //     price: "Цена",
+            //     description: "Описание",
+            //     seller: "@юзернейм",
+            //     photo: "images/фото.jpg"
+            // },
         ];
 
         // ============================================================
         // 2. КОД ОТРИСОВКИ (НЕ ТРОГАЙ)
         // ============================================================
-
-        function renderStars(rating, maxStars = 5) {
-            let html = '';
-            const filled = Math.min(Math.max(rating, 0), maxStars);
-            for (let i = 0; i < maxStars; i++) {
-                html += `<span class="star-icon ${i < filled ? 'filled' : 'empty'}">★</span>`;
-            }
-            return html;
-        }
 
         function getUserData() {
             try {
@@ -282,8 +241,6 @@
             } else {
                 avatarImg.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"%3E%3Ccircle cx="24" cy="24" r="24" fill="%23e0e0e0"/%3E%3Ctext x="24" y="29" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="16" fill="%23999"%3EM%3C/text%3E%3C/svg%3E';
             }
-
-            document.getElementById('starsContainer').innerHTML = renderStars(RATING.stars);
         }
 
         function renderProducts() {
